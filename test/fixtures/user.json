@@ -1,0 +1,34 @@
+[
+  {
+    "_id": "635eccc34dc4ea83291cf8de",
+    "firstname": "user",
+    "lastname": "1",
+    "email": "user1@mail.com",
+    "password": "password1",
+    "__v": 0
+  },
+  {
+    "_id": "635eccc34dc4ea83291cf8dc",
+    "firstname": "user",
+    "lastname": "2",
+    "email": "user2@mail.com",
+    "password": "password2",
+    "__v": 0
+  },
+  {
+    "_id": "635eccc34dc4ea83291cf8da",
+    "firstname": "user",
+    "lastname": "3",
+    "email": "user3@mail.com",
+    "password": "password3",
+    "__v": 0
+  },
+  {
+    "_id": "635eccc24dc4ea83291cf8d8",
+    "firstname": "user",
+    "lastname": "4",
+    "email": "user4@mail.com",
+    "password": "password4",
+    "__v": 0
+  }
+]

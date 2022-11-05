@@ -13,10 +13,12 @@ const {
   deletePost,
   getAllMyPost,
   updatePost,
+  getAllPublishedPost,
+  getSinglePublishedPost,
 } = require("../controllers/postController");
 
 // postRouter.get("/", authenticate.verifyUser, getAllPosts);
-// postRouter.get("/", getAllPublishedPosts);
+postRouter.get("/", getAllPublishedPost);
 postRouter.get("/my-post", authenticate.verifyUser, getAllMyPost);
 
 postRouter.patch(
@@ -24,12 +26,12 @@ postRouter.patch(
   authenticate.verifyUser,
   protect,
   updateState
-);
+); //WORKING
 
-postRouter.post("/", authenticate.verifyUser, createPost);
-postRouter.patch("/:id", authenticate.verifyUser, protect, updatePost);
+postRouter.get("/:id", getSinglePublishedPost);
+postRouter.post("/", authenticate.verifyUser, createPost); //WORKING
+postRouter.patch("/:id", authenticate.verifyUser, protect, updatePost); //WORKING
 
-postRouter.delete("/:id", authenticate.verifyUser, protect, deletePost);
-// postRouter.delete("/:id", deletePost);
+postRouter.delete("/:id", authenticate.verifyUser, protect, deletePost); //WORKING
 
 module.exports = { postRouter };
