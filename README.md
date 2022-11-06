@@ -461,6 +461,12 @@
 
 ---
 
+# CREATING A COLLECTION
+
+- Use postman or thunderclient to create a collection
+
+---
+
 # Contributor
 
 - **Anosike Prosper**
