@@ -33,7 +33,7 @@ beforeAll(async () => {
   }
 });
 
-describe("Creating a blog", () => {
+describe("Creating a blog/post", () => {
   const post = allPosts[0];
   it("should work with valid token", async () => {
     const user = "user1@mail.com";
@@ -85,7 +85,6 @@ describe("GET request to /post", () => {
       .get("/post")
       .expect(200)
       .expect("Content-Type", /application\/json/);
-    // console.log(response.body);
 
     const postStates = response.body.post.map((post) => post.state);
     expect(postStates).not.toContain("drafted");
@@ -106,22 +105,18 @@ describe("GET request to /post", () => {
   });
 
   it("when requested by ID should be able to get a published blog", async () => {
-    // const articlesAtStart = await postModel.count({});
-
     const articleLength = allPosts.length - 1;
     const article = allPosts[articleLength];
 
-    const resultArticle = await api
+    const resultPosts = await api
       .get(`/post/${article._id}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
-    //     const processedArticleToView = JSON.parse(JSON.stringify(articleToView));
-
-    expect(resultArticle.body.post.title).toEqual(article.title);
-    expect(resultArticle.body.post.body).toEqual(article.body);
-    expect(resultArticle.body.post.tags).toEqual(article.tags);
-    expect(resultArticle.body.post._id).toEqual(article._id);
+    expect(resultPosts.body.post.title).toEqual(article.title);
+    expect(resultPosts.body.post.body).toEqual(article.body);
+    expect(resultPosts.body.post.tags).toEqual(article.tags);
+    expect(resultPosts.body.post._id).toEqual(article._id);
   });
 
   it("when requested by ID should return the author information", async () => {
@@ -129,69 +124,35 @@ describe("GET request to /post", () => {
     const articleLength = allPosts.length - 1;
     const article = allPosts[articleLength];
 
-    const resultArticle = await api
+    const resultPosts = await api
       .get(`/post/${article._id}`)
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
-    expect(resultArticle.body.post.owner_id).toHaveProperty("owner_id");
-    expect(resultArticle.body.post.owner_id).toHaveProperty("firstname");
-    expect(resultArticle.body.post.owner_id).toHaveProperty("lastname");
-    expect(resultArticle.body.post.owner_id).toHaveProperty("email");
+    expect(resultPosts.body.post).toHaveProperty("owner_id");
+    expect(resultPosts.body.post.owner_id).toHaveProperty("firstname");
+    expect(resultPosts.body.post.owner_id).toHaveProperty("lastname");
+    expect(resultPosts.body.post.owner_id).toHaveProperty("email");
   });
 
-  //   it("when requested by ID should increase the read_count by 1", async () => {
-  //     const articlesAtStart = await helper.articlesInDb();
+  it("when requested by ID should increase the read_count by 1", async () => {
+    const articleLength = allPosts.length - 1;
+    const article = allPosts[articleLength];
 
-  //     const articleToView = articlesAtStart[0];
+    let resultCount = await api
+      .get(`/post/${article._id}`)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
 
-  //     await api
-  //       .get(`/api/blog/${articleToView._id}`)
-  //       .expect(200)
-  //       .expect("Content-Type", /application\/json/);
+    let count = resultCount.body.post.read_count;
 
-  //     const articlesAtMid = await helper.articlesInDb();
-  //     const articleViewedAtMid = articlesAtMid[0];
+    resultCount = await api
+      .get(`/post/${article._id}`)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
 
-  //     expect(articleViewedAtMid.read_count).toBe(articleToView.read_count + 1);
-
-  //     await api
-  //       .get(`/api/blog/${articleToView._id}`)
-  //       .expect(200)
-  //       .expect("Content-Type", /application\/json/);
-
-  //     const articlesAtEnd = await helper.articlesInDb();
-  //     const articleViewed = articlesAtEnd[0];
-
-  //     expect(articleViewed.read_count).toBe(articleToView.read_count + 2);
-  //   });
-
-  //   it("returns a maximum of 20 blogs per page", async () => {
-  //     const response = await api
-  //       .get("/api/blog")
-  //       .expect(200)
-  //       .expect("Content-Type", /application\/json/);
-
-  //     expect(response.body.message.length).toBe(20);
-  // });
-
-  //   it("returns n blogs per page and a maximum of 20 blogs per page", async () => {
-  //     let size = 9;
-  //     const response = await api
-  //       .get(`/api/blog?size=${size}`)
-  //       .expect(200)
-  //       .expect("Content-Type", /application\/json/);
-
-  //     expect(response.body.message.length).toBe(size);
-
-  //     size = 90;
-  //     const response2 = await api
-  //       .get(`/api/blog?size=${size}`)
-  //       .expect(200)
-  //       .expect("Content-Type", /application\/json/);
-
-  //     expect(response2.body.data.length).toBe(20);
-  //   });
+    expect(resultCount.body.post.read_count).toEqual(count + 1);
+  });
 });
 
 afterAll(async () => {

@@ -19,7 +19,6 @@ function validate(req, res, next) {
 
   const extractedErrors = [];
 
-  console.log(errors.array());
   errors.array().map((err) => {
     extractedErrors.push({ [err.param]: err.msg });
   });

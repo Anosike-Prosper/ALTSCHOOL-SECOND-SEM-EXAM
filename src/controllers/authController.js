@@ -84,31 +84,3 @@ const userLogin = async (req, res) => {
 
 module.exports = { userSignup, userLogin };
 
-// const { email, password } = req.body;
-
-// const user = await userLogin(email, password);
-
-// if (!user) {
-//   return res.status(404).json({
-//     status: "fail",
-//     message: "Invalid email or password",
-//   });
-// }
-
-// const verifyPassword = await bcrypt.compare(password, user.password);
-
-// if (!verifyPassword) {
-//   return res.status(404).json({
-//     status: "fail",
-//     message: "Invalid email or password",
-//   });
-// }
-
-// const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-//   expiresIn: process.env.JWT_EXPIRATION,
-// });
-
-// res.status(200).json({
-//   status: true,
-//   token: token,
-// });

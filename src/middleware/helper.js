@@ -35,13 +35,6 @@ const protect = async (req, res, next) => {
   // console.log(req.state);
 
   return next();
-
-  // if (post.owner_id.equals(user_id)) {
-  //   req.state = post.state;
-  //   console.log(req.state);
-
-  //   return next();
-  // }
 };
 
 module.exports = { protect };

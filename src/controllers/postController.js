@@ -24,7 +24,6 @@ const createPost = async (req, res) => {
       message: newPost,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       status: "fail",
       message: err,
@@ -46,7 +45,7 @@ const updateState = async (req, res) => {
   // console.log(postState);
 
   //IF THE STATE OF THE POST IS NOT ALREADY IN PUBLISHED, UPDATE THE STATE TO PUBLISHED
-  if (postState !== userState) {
+  if (postState !== "published" && postState !== userState) {
     const post = await postModel.findByIdAndUpdate(
       id,
       { $set: { state: userState } },
@@ -62,24 +61,34 @@ const updateState = async (req, res) => {
   //IF THE POST STATE IS ALREADY IN PUBLISHED, THEN THERE IS NO NEED TO UPDATE IT
   return res
     .status(400)
-    .json({ message: "Post is already in published state" });
+    .json({ message: `Post is already in ${postState} state` });
 };
 
 const deletePost = async (req, res) => {
   //GETS THE POST ID
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  //GETS THE USER ID FROM THE RWQUEST
-  const user_id = req.user._id;
+    //GETS THE USER ID FROM THE RWQUEST
+    const user_id = req.user._id;
 
-  //DELETE THE POST WITH THE POST ID PASSED AND THE POST SHOULD ALSO BELONG TO THE USER IN THE REQUEST BODY
+    //DELETE THE POST WITH THE POST ID PASSED AND THE POST SHOULD ALSO BELONG TO THE USER IN THE REQUEST BODY
 
-  const post = await postModel.findOneAndDelete({ _id: id, owner_id: user_id });
+    const post = await postModel.findOneAndDelete({
+      _id: id,
+      owner_id: user_id,
+    });
 
-  return res.status(200).json({
-    status: "success",
-    msg: "Post has been successfully deleted",
-  });
+    return res.status(200).json({
+      status: "success",
+      msg: "Post has been successfully deleted",
+    });
+  } catch (err) {
+    return res.status(404).json({
+      status: "fail",
+      msg: "Post not found",
+    });
+  }
 };
 
 const getAllMyPost = async (req, res) => {
@@ -130,8 +139,6 @@ const updatePost = async (req, res) => {
     const { id } = req.params;
     const postBodyToUpdate = req.body;
 
-    console.log(postBodyToUpdate);
-
     const post = await postModel.findByIdAndUpdate(id, postBodyToUpdate, {
       new: true,
       runValidators: true,
@@ -150,68 +157,51 @@ const updatePost = async (req, res) => {
 };
 
 const getAllPublishedPost = async (req, res) => {
-  let objectToQuery = { ...req.query };
+  try {
+    let objectToQuery = { ...req.query, state: "published" };
 
-  //EXCLUDES THE FOLLOWING FIELDS INCASE THE USER PASSES THEM
+    //EXCLUDES THE FOLLOWING FIELDS INCASE THE USER PASSES THEM
 
-  const excludeFields = [
-    "page",
-    "filter",
-    "limit",
-    "sort",
-    "state",
-    "author",
-    "title",
-    "tags",
-  ];
-  excludeFields.forEach((el) => delete objectToQuery[el]);
+    const excludeFields = ["page", "filter", "limit", "sort", "tags"];
+    excludeFields.forEach((el) => delete objectToQuery[el]);
 
-  console.log(objectToQuery);
+    if (req.query.tags) {
+      objectToQuery.tags = { $in: req.query.tags.split(",") };
+    }
 
-  objectToQuery.state = "published";
+    let query = postModel.find({
+      ...objectToQuery,
+    });
 
-  console.log(objectToQuery);
+    // WE WANT TO SORT BY READ COUNT, READ TIME, TIME STAMP
 
-  // WE WANT TO FILTER BY AUTHOR, TITLE, TAGS
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
 
-  if (req.query.author) {
-    objectToQuery.author = req.query.author;
+      query = query.sort(sortBy);
+    }
+
+    //
+    //PAGINATE
+    //PAGINATE
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 20;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    const post = await query.exec();
+
+    return res.status(200).json({
+      status: "success",
+      post: post,
+    });
+  } catch (err) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Post not found",
+    });
   }
-
-  if (req.query.tags) {
-    objectToQuery.tags = req.query.tags;
-  }
-
-  if (req.query.title) {
-    objectToQuery.title = req.query.title;
-  }
-
-  let query = postModel.find(objectToQuery);
-
-  console.log(objectToQuery);
-  // WE WANT TO SORT BY READ COUNT, READ TIME, TIME STAMP
-
-  if (req.query.sort) {
-    console.log(req.query.sort);
-    const sortBy = req.query.sort.split(",").join(" ");
-    query = query.sort(sortBy);
-  }
-
-  //
-  //PAGINATE
-  //PAGINATE
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 20;
-  const skip = (page - 1) * limit;
-
-  query = query.skip(skip).limit(limit);
-
-  const post = await query;
-
-  return res.status(200).json({
-    status: "success",
-    post: post,
-  });
 
   //
   //   // WE ALSO WANT A DEFAULT OF 20 PAGES
@@ -231,8 +221,6 @@ const getSinglePublishedPost = async (req, res) => {
 
     post.read_count = post.read_count += 1;
     await post.save();
-
-    console.log(post);
 
     return res.status(200).json({
       status: "success",

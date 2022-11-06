@@ -6,18 +6,19 @@
 
 ---
 
-<ol>
- <li>User should be able to register</li>
+<ul>
+ <li>User should be able to sign up</li>
 <li> User should be able Login</li>
 <li>User authentication using JWT</li>
-<li> User should be able to create blop post</li>
-<li>User should be able to get all blog post</li>
-<li>User should be able to get a post by id</li>
-<li>User should be able to update the state of a post</li>
-<li>User should be able update the body of a post</li>
-<li> User should be able to get all their post</li>
+<li> User should be able to create blog post</li>
+<li>User should be able to get all published blog post</li>
+<li>User should be able to get a published blog post by id</li>
+<li>User should be able to update the state of a blog post</li>
+<li>User should be able update the body of a blog post</li>
+<li> User should be able to get all their blog  post</li>
 <li>User should be able to delete their blog post</li>
-</ol>
+<li>Test Application</li>
+</ul>
 
 ---
 
@@ -29,7 +30,8 @@
 - Pull this repo
 - Update env file with .env
 
-- run: `npm run start: dev`
+- run: `npm run start` (for production)
+- run: `npm run dev` (for development)
 
 ---
 
@@ -125,7 +127,7 @@
 
 ---
 
-## Create Post
+## Create Post/Blog
 
 - Route: /post
 - Method: POST
@@ -168,7 +170,7 @@
 
 ---
 
-## Update Post State
+## Update Post/Blog State
 
 - Route: /post/update-state/:id
 - Method: PATCH
@@ -207,7 +209,7 @@
 
 ---
 
-## Update Post
+## Update Post/Blog
 
 - Route: /post/:id
 - Method: PATCH
@@ -249,7 +251,7 @@
 
 ---
 
-## Delete Post
+## Delete Post/Blog
 
 - Route: /post/:id
 - Method: DELETE
@@ -267,7 +269,7 @@
 
 ---
 
-## Get Posts By User
+## Get Posts/Blogs By User
 
 - Route: /post/my-post
 - Method: GET
@@ -278,6 +280,7 @@
   - page default(1)
   - limit default(10)
   - state
+  - Note: Query parameters and their values should be in lowercase(small letters)
 
 - Response
 
@@ -374,7 +377,7 @@
 
 ---
 
-## Get All Published Posts
+## Get All Published Posts/Blogs
 
 - Route: post/
 
@@ -387,7 +390,8 @@
   - author
   - title
   - tags
-  - sort (-read_count || read_count || -reading_time || reading_time || -createdAt || createdAt )
+  - sort (-read_count || read_count || -reading_time || reading_time || -timestamps || timestamps )
+  - NOTE: Query parameters and their valuesshould be in lowercase(small letters)
 
 - Response: success
 
@@ -417,7 +421,7 @@
 
 ```
 
-## Get Published Post By Id
+## Get Published Post/Blog By Id
 
 - Route: /post/:id
 - Method: GET
@@ -446,3 +450,19 @@
   reading_time: ' <1 mins read'
 }
 ```
+
+---
+
+# TESTS
+
+- **All test should be run separately and not together**
+  - The fixtures folder in the test folder contains dummy data for users and posts that are used for the tests. Use the following commands:
+    - run: `npm run test -- test/user_signup.test.js` (for user sign up test)
+    - run: `npm run test -- test/user_login.test.js` (for user login test)
+    - run: `npm run test -- test/post.test.js` (for posts test)
+
+---
+
+# Contributor
+
+- **Anosike Prosper**
