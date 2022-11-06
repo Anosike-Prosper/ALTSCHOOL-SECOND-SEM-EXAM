@@ -455,11 +455,9 @@
 
 # TESTS
 
-- **All test should be run separately and not together**
+- **To run the test**
+  - run : `npm run test -- test.test.js`
   - The fixtures folder in the test folder contains dummy data for users and posts that are used for the tests. Use the following commands:
-    - run: `npm run test -- test/user_signup.test.js` (for user sign up test)
-    - run: `npm run test -- test/user_login.test.js` (for user login test)
-    - run: `npm run test -- test/post.test.js` (for posts test)
 
 ---
 
