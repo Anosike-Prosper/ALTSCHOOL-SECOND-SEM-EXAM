@@ -1,35 +1,37 @@
 const postModel = require("../models/postModel");
+const AppError = require("../../utils/appError");
+const { catchAsync } = require("../../utils/catchAsync");
 
-const createPost = async (req, res) => {
-  try {
-    const { title, author, description, tags, body } = req.body;
+const createPost = catchAsync(async (req, res) => {
+  const { title, author, description, tags, body } = req.body;
 
-    // GET THE USER ID FROM THE REQUEST BODY WHEN THE USER HAS SUCCESSFULLY LOGGED IN. PASSPORT HANDLES THIS BY DEFAULT
-    const owner_id = req.user._id;
+  // GET THE USER ID FROM THE REQUEST BODY WHEN THE USER HAS SUCCESSFULLY LOGGED IN. PASSPORT HANDLES THIS BY DEFAULT
+  const owner_id = req.user._id;
 
-    // console.log("this is the owner id", owner_id);
-    // console.log(req.user);
+  // console.log("this is the owner id", owner_id);
+  // console.log(req.user);
 
-    const newPost = await postModel.create({
-      title,
-      author,
-      description,
-      tags,
-      body,
-      owner_id,
-    });
+  const newPost = await postModel.create({
+    title,
+    author,
+    description,
+    tags,
+    body,
+    owner_id,
+  });
 
-    res.status(201).json({
-      status: "success",
-      message: newPost,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: "fail",
-      message: err,
-    });
-  }
-};
+  res.status(201).json({
+    status: "success",
+    message: newPost,
+  });
+  // try {
+  // } catch (err) {
+  //   res.status(500).json({
+  //     status: "fail",
+  //     message: err,
+  //   });
+  // }
+});
 
 const updateState = async (req, res) => {
   // console.log(req.body);
@@ -66,29 +68,29 @@ const updateState = async (req, res) => {
 
 const deletePost = async (req, res) => {
   //GETS THE POST ID
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    //GETS THE USER ID FROM THE RWQUEST
-    const user_id = req.user._id;
+  //GETS THE USER ID FROM THE RWQUEST
+  const user_id = req.user._id;
 
-    //DELETE THE POST WITH THE POST ID PASSED AND THE POST SHOULD ALSO BELONG TO THE USER IN THE REQUEST BODY
+  //DELETE THE POST WITH THE POST ID PASSED AND THE POST SHOULD ALSO BELONG TO THE USER IN THE REQUEST BODY
 
-    const post = await postModel.findOneAndDelete({
-      _id: id,
-      owner_id: user_id,
-    });
+  const post = await postModel.findOneAndDelete({
+    _id: id,
+    owner_id: user_id,
+  });
 
-    return res.status(200).json({
-      status: "success",
-      msg: "Post has been successfully deleted",
-    });
-  } catch (err) {
-    return res.status(404).json({
-      status: "fail",
-      msg: "Post not found",
-    });
-  }
+  return res.status(200).json({
+    status: "success",
+    msg: "Post has been successfully deleted",
+  });
+  // try {
+  // } catch (err) {
+  //   return res.status(404).json({
+  //     status: "fail",
+  //     msg: "Post not found",
+  //   });
+  // }
 };
 
 const getAllMyPost = async (req, res) => {
@@ -134,26 +136,26 @@ const getAllMyPost = async (req, res) => {
   }
 };
 
-const updatePost = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const postBodyToUpdate = req.body;
+const updatePost = async (req, res, next) => {
+  const { id } = req.params;
+  const postBodyToUpdate = req.body;
 
-    const post = await postModel.findByIdAndUpdate(id, postBodyToUpdate, {
-      new: true,
-      runValidators: true,
-    });
+  const post = await postModel.findByIdAndUpdate(id, postBodyToUpdate, {
+    new: true,
+    runValidators: true,
+  });
 
-    return res.status(200).json({
-      status: "update successful",
-      post: post,
-    });
-  } catch (err) {
-    return res.status(404).json({
-      status: "fail",
-      message: "Post not found",
-    });
-  }
+  return res.status(200).json({
+    status: "update successful",
+    post: post,
+  });
+  // try {
+  // } catch (err) {
+  //   return res.status(404).json({
+  //     status: "fail",
+  //     message: "Post not found",
+  //   });
+  // }
 };
 
 const getAllPublishedPost = async (req, res) => {
@@ -209,30 +211,34 @@ const getAllPublishedPost = async (req, res) => {
   //   // console.log(allPublishedPosts);
 };
 
-const getSinglePublishedPost = async (req, res) => {
-  try {
-    const { id } = req.params;
+const getSinglePublishedPost = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
 
-    const post = await postModel
-      .findById(id)
-      .where("state")
-      .equals("published")
-      .populate("owner_id");
+  const post = await postModel
+    .findById(id)
+    .where("state")
+    .equals("published")
+    .populate("owner_id");
 
-    post.read_count = post.read_count += 1;
-    await post.save();
-
-    return res.status(200).json({
-      status: "success",
-      post: post,
-    });
-  } catch (err) {
-    return res.status(404).json({
-      status: "fail",
-      message: "Post not found",
-    });
+  if (!post) {
+    console.log("hello");
+    return next(new AppError(`Post with ${id} not found`, 404));
   }
-};
+  post.read_count = post.read_count += 1;
+  await post.save();
+
+  return res.status(200).json({
+    status: "success",
+    post: post,
+  });
+  // try {
+  // } catch (err) {
+  //   return res.status(404).json({
+  //     status: "fail",
+  //     message: err,
+  //   });
+  // }
+});
 
 module.exports = {
   createPost,
