@@ -36,11 +36,11 @@ userSchema.pre("save", async function (next) {
 });
 
 // // A MIDDLEWARE TO CHECK PASSWORD
-// userSchema.methods.correctPassword = async function (password) {
-//   const user = this;
-//   const compare = await bcrypt.compare(password, user.password);
-
-//   return compare;
-// };
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 module.exports = mongoose.model("User", userSchema);
