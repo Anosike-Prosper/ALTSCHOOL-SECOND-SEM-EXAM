@@ -1,6 +1,8 @@
 // const { validateUser } = require("../middleware/helper");
 require("dotenv").config();
 const userModel = require("../models/userModel");
+const AppError = require("../../utils/appError");
+const { catchAsync } = require("../../utils/catchAsync");
 
 const bcrypt = require("bcrypt");
 
@@ -8,73 +10,47 @@ const validator = require("express-validator");
 
 const jwt = require("jsonwebtoken");
 
-const userSignup = async (req, res) => {
-  // console.log(user);
-  try {
-    const { firstname, lastname, email, password } = req.body;
+const createToken = (id) => {
+  const token = jwt.sign({ id: id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRATION,
+  });
 
-    const userExist = await userModel.findOne({ email });
-
-    if (userExist) {
-      return res.status(400).json({
-        message: "This user already exist",
-      });
-    }
-
-    const newUser = await userModel.create({
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      email: req.body.email,
-      password: req.body.password,
-    });
-
-    return res.status(201).send({
-      message: "User has been succesfully signed up",
-      data: newUser,
-    });
-  } catch (err) {
-    return res.status(400).send({
-      message: err,
-      // message: "User has been succesfully signed up",
-      // data: newUser,
-    });
-  }
+  return token;
 };
-//GET USER DETAILS
 
-const userLogin = async (req, res) => {
+const userSignup = catchAsync(async (req, res, next) => {
+  const { firstname, lastname, email, password } = req.body;
+
+  const newUser = await userModel.create({
+    firstname,
+    lastname,
+    email,
+    password,
+  });
+
+  const token = createToken(newUser._id);
+
+  return res.status(201).send({
+    message: "User has been succesfully signed up",
+    token: token,
+    data: newUser,
+  });
+});
+
+const userLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({
-      status: "fail",
-      msg: "Input email or password",
-    });
+    return next(new AppError("Please provide email and password", 400));
   }
 
   const user = await userModel.findOne({ email });
 
-  // console.log(user);
-
-  if (!user) {
-    return res.status(404).json({
-      status: "fail",
-      msg: "User not found",
-    });
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError("Incorrect email or Password", 401));
   }
 
-  const verifyPassword = await bcrypt.compare(password, user.password);
-
-  if (!verifyPassword) {
-    return res.status(404).json({
-      status: "fail",
-      message: "Invalid email or password",
-    });
-  }
-
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRATION,
-  });
+  const token = createToken(user.id);
 
   return res.status(200).json({
     status: true,
@@ -84,3 +60,15 @@ const userLogin = async (req, res) => {
 
 module.exports = { userSignup, userLogin };
 
+// const verifyPassword = await bcrypt.compare(password, user.password);
+
+// if (!verifyPassword) {
+//   return res.status(404).json({
+//     status: "fail",
+//     message: "Invalid email or password",
+//   });
+// }
+
+// jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+//   expiresIn: process.env.JWT_EXPIRATION,
+// });
