@@ -24,27 +24,16 @@ const createPost = catchAsync(async (req, res) => {
     status: "success",
     message: newPost,
   });
-  // try {
-  // } catch (err) {
-  //   res.status(500).json({
-  //     status: "fail",
-  //     message: err,
-  //   });
-  // }
 });
 
 const updateState = async (req, res) => {
-  // console.log(req.body);
-  // console.log(req.params.id);
   const { id } = req.params;
 
   //USER PASSES THE STATE HE WANTS TO UPDATE IT TO
   const userState = req.body.state;
-  // console.log(userState);
 
   // THE STATE THAT WAS GOTTEN IN THE PROTECT MIDDLEWARE
   const postState = req.state;
-  // console.log(postState);
 
   //IF THE STATE OF THE POST IS NOT ALREADY IN PUBLISHED, UPDATE THE STATE TO PUBLISHED
   if (postState !== "published" && postState !== userState) {
@@ -84,13 +73,6 @@ const deletePost = async (req, res) => {
     status: "success",
     msg: "Post has been successfully deleted",
   });
-  // try {
-  // } catch (err) {
-  //   return res.status(404).json({
-  //     status: "fail",
-  //     msg: "Post not found",
-  //   });
-  // }
 };
 
 const getAllMyPost = async (req, res) => {
@@ -145,17 +127,14 @@ const updatePost = async (req, res, next) => {
     runValidators: true,
   });
 
+  if (!post) {
+    return next(new AppError(`Post not found`, 404));
+  }
+
   return res.status(200).json({
     status: "update successful",
     post: post,
   });
-  // try {
-  // } catch (err) {
-  //   return res.status(404).json({
-  //     status: "fail",
-  //     message: "Post not found",
-  //   });
-  // }
 };
 
 const getAllPublishedPost = async (req, res) => {
@@ -204,11 +183,6 @@ const getAllPublishedPost = async (req, res) => {
       message: "Post not found",
     });
   }
-
-  //
-  //   // WE ALSO WANT A DEFAULT OF 20 PAGES
-
-  //   // console.log(allPublishedPosts);
 };
 
 const getSinglePublishedPost = catchAsync(async (req, res, next) => {
@@ -231,13 +205,6 @@ const getSinglePublishedPost = catchAsync(async (req, res, next) => {
     status: "success",
     post: post,
   });
-  // try {
-  // } catch (err) {
-  //   return res.status(404).json({
-  //     status: "fail",
-  //     message: err,
-  //   });
-  // }
 });
 
 module.exports = {
