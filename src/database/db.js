@@ -1,20 +1,22 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-function getUrl() {
-  const env = process.env.NODE_ENV;
+// function getUrl() {
+//   const env = process.env.NODE_ENV;
 
-  switch (env) {
-    case "test":
-    case "development":
-      return process.env.DEV_MONGO_URL;
+//   switch (env) {
+//     case "test":
+//     case "development":
+//       return process.env.DEV_MONGO_URL;
 
-    case "production":
-    default:
-      return process.env.MONGO_URL;
-  }
-}
-const MONGO_URL = getUrl();
+//     case "production":
+//     default:
+//       return process.env.MONGO_URL;
+//   }
+// }
+// const MONGO_URL = getUrl();
+
+const MONGO_URL = process.env.MONGO_URL;
 
 function connectToMongoDB() {
   mongoose.connect(MONGO_URL);
